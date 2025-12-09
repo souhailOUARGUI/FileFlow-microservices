@@ -1,16 +1,21 @@
 package org.example.fileservice.feign;
 
-
-import org.example.commonlibrary.dto.UserDTO;
+import org.example.fileservice.dto.UserDTO;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.*;
 
-@FeignClient(name = "user-service")
+@FeignClient(name = "user-service", path = "/api/users")
 public interface UserServiceClient {
-    @GetMapping("/users/{id}")
-    UserDTO getUserById(@PathVariable("id") Long id);
+    
+    @GetMapping("/profile/{userId}")
+    UserDTO getUserById(@PathVariable("userId") Long userId);
 
-    @GetMapping("/users/email/{email}")
+    @GetMapping("/public/email/{email}")
     UserDTO getUserByEmail(@PathVariable("email") String email);
+    
+    @PutMapping("/internal/{userId}/storage")
+    void updateStorageUsed(@PathVariable("userId") Long userId, @RequestParam("sizeChange") Long sizeChange);
+    
+    @GetMapping("/internal/{userId}/storage/check")
+    Boolean hasStorageSpace(@PathVariable("userId") Long userId, @RequestParam("fileSize") Long fileSize);
 }
