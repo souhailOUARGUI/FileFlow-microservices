@@ -1,0 +1,116 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Databases
+  postgres-users:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: fileflow_users
+      POSTGRES_USER: fileflow_user
+      POSTGRES_PASSWORD: fileflow_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_users_data:/var/lib/postgresql/data
+
+  postgres-files:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: fileflow_files
+      POSTGRES_USER: fileflow_user
+      POSTGRES_PASSWORD: fileflow_password
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_files_data:/var/lib/postgresql/data
+
+  postgres-folders:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: fileflow_folders
+      POSTGRES_USER: fileflow_user
+      POSTGRES_PASSWORD: fileflow_password
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres_folders_data:/var/lib/postgresql/data
+
+  # RabbitMQ
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: fileflow
+      RABBITMQ_DEFAULT_PASS: fileflow123
+
+  # Eureka Server
+  eureka-server:
+    build: ./eureka-server
+    ports:
+      - "8761:8761"
+
+  # Config Server
+  config-server:
+    build: ./config-server
+    ports:
+      - "8888:8888"
+    depends_on:
+      - eureka-server
+
+  # API Gateway
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - eureka-server
+      - config-server
+
+  # User Service
+  user-service:
+    build: ./user-service
+    ports:
+      - "8081:8081"
+    depends_on:
+      - postgres-users
+      - eureka-server
+      - rabbitmq
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-users:5432/fileflow_users
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+
+  # File Service
+  file-service:
+    build: ./file-service
+    ports:
+      - "8082:8082"
+    depends_on:
+      - postgres-files
+      - eureka-server
+      - rabbitmq
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-files:5432/fileflow_files
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    volumes:
+      - file_uploads:/app/uploads
+
+  # Folder Service
+  folder-service:
+    build: ./folder-service
+    ports:
+      - "8083:8083"
+    depends_on:
+      - postgres-folders
+      - eureka-server
+      - rabbitmq
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-folders:5432/fileflow_folders
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+
+volumes:
+  postgres_users_data:
+  postgres_files_data:
+  postgres_folders_data:
+  file_uploads:
