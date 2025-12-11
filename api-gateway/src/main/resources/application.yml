@@ -1,0 +1,97 @@
+server:
+  port: 8087
+
+spring:
+  application:
+    name: api-gateway
+  
+  main:
+    web-application-type: servlet
+
+  cloud:
+    gateway:
+      mvc:
+        # Enable service discovery for routes
+        discovery:
+          locator:
+            enabled: true
+            lower-case-service-id: true
+        
+        # Define routes
+        routes:
+          # User Service - Authentication
+          - id: user-service-auth
+            uri: lb://user-service
+            predicates:
+              - Path=/api/auth/**
+          
+          # User Service - Users
+          - id: user-service-users
+            uri: lb://user-service
+            predicates:
+              - Path=/api/users/**
+          
+          # User Service - Email
+          - id: user-service-email
+            uri: lb://user-service
+            predicates:
+              - Path=/api/email/**
+          
+          # File Service - Files
+          - id: file-service-files
+            uri: lb://file-service
+            predicates:
+              - Path=/api/files/**
+          
+          # File Service - File Share
+          - id: file-service-share
+            uri: lb://file-service
+            predicates:
+              - Path=/api/file/**
+          
+          # File Service - Favourites
+          - id: file-service-favourites
+            uri: lb://file-service
+            predicates:
+              - Path=/api/favourites/**
+          
+          # Folder Service
+          - id: folder-service
+            uri: lb://folder-service
+            predicates:
+              - Path=/api/folders/**
+
+# Eureka Client Configuration
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka/}
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${server.port}
+
+# JWT Configuration (must match user-service)
+jwt:
+  secret: ${JWT_SECRET:your-super-secret-key-for-jwt-token-generation-minimum-256-bits}
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway,metrics
+  endpoint:
+    gateway:
+      enabled: true
+    health:
+      show-details: always
+
+# Logging
+logging:
+  level:
+    root: INFO
+    org.example.apigateway: DEBUG
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.web: DEBUG
