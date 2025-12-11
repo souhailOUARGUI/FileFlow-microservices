@@ -49,4 +49,7 @@ public interface FileRepository extends JpaRepository<File, Long> {
 
     @Query("SELECT f FROM File f WHERE f.userId = :userId AND f.originalFile.id = :originalFileId")
     Optional<File> findByUserIdAndOriginalFileId(@Param("userId") Long userId, @Param("originalFileId") Long originalFileId);
+    
+    // Method for event-driven cleanup
+    List<File> findByUserId(Long userId);
 }

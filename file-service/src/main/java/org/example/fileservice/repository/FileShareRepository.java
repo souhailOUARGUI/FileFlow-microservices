@@ -54,4 +54,13 @@ public interface FileShareRepository extends JpaRepository<FileShare, Long> {
 
     @Query("SELECT fs FROM FileShare fs WHERE fs.file.userId = :userId ORDER BY fs.createdAt DESC")
     List<FileShare> findByUserIdOrderByCreatedAtDesc(@Param("userId") Long userId);
+    
+    // Methods for event-driven cleanup
+    @Modifying
+    @Query("DELETE FROM FileShare fs WHERE fs.targetUserId = :userId")
+    int deleteByTargetUserId(@Param("userId") Long userId);
+    
+    @Modifying
+    @Query("DELETE FROM FileShare fs WHERE fs.file.id = :fileId")
+    void deleteByFileId(@Param("fileId") Long fileId);
 }

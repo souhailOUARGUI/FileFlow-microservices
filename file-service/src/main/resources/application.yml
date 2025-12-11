@@ -25,6 +25,34 @@ spring:
       enabled: true
       max-file-size: 100MB
       max-request-size: 100MB
+  
+  # RabbitMQ Configuration
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+  
+  # Spring Cloud Configuration (merged)
+  cloud:
+    config:
+      enabled: false
+    stream:
+      bindings:
+        userCreatedConsumer-in-0:
+          destination: user-created
+          content-type: application/json
+          group: file-service-group
+        userDeletedConsumer-in-0:
+          destination: user-deleted
+          content-type: application/json
+          group: file-service-group
+        storageUpdatedConsumer-in-0:
+          destination: storage-updated
+          content-type: application/json
+          group: file-service-group
+      function:
+        definition: userCreatedConsumer;userDeletedConsumer;storageUpdatedConsumer
 
 # File Storage Configuration
 file:
@@ -44,7 +72,7 @@ eureka:
     fetch-registry: true
   instance:
     prefer-ip-address: true
-    instance-id: ${spring.application.name}:${random.value}
+    instance-id: ${spring.application.name}:${server.port}
 
 # Feign Client Configuration
 feign:
@@ -70,10 +98,3 @@ management:
   endpoint:
     health:
       show-details: when-authorized
-
-# Springdoc OpenAPI
-springdoc:
-  api-docs:
-    path: /v3/api-docs
-  swagger-ui:
-    path: /swagger-ui.html
