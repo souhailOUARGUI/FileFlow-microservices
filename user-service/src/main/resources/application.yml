@@ -19,6 +19,29 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
+  
+  # RabbitMQ Configuration
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+  
+  # Spring Cloud Configuration (merged)
+  cloud:
+    config:
+      enabled: false
+    stream:
+      bindings:
+        user-created-out-0:
+          destination: user-created
+          content-type: application/json
+        user-deleted-out-0:
+          destination: user-deleted
+          content-type: application/json
+        storage-updated-out-0:
+          destination: storage-updated
+          content-type: application/json
 
 # JWT Configuration
 jwt:
@@ -45,10 +68,7 @@ eureka:
     fetch-registry: true
   instance:
     prefer-ip-address: true
-    instance-id: ${spring.application.name}:${random.value}
-
-# Spring Cloud Config (optional)
-# spring.config.import: optional:configserver:http://localhost:8888
+    instance-id: ${spring.application.name}:${server.port}
 
 # Logging
 logging:
@@ -56,7 +76,6 @@ logging:
     root: INFO
     org.example.userservice: DEBUG
     org.springframework.security: DEBUG
-    org.hibernate.SQL: DEBUG
 
 # Actuator
 management:

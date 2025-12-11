@@ -2,6 +2,7 @@ package org.example.userservice.controller;
 
 import jakarta.validation.Valid;
 import org.example.userservice.dto.UserResponseDTO;
+import org.example.userservice.dto.UserStorageInfo;
 import org.example.userservice.dto.UserUpdateRequest;
 import org.example.userservice.service.ProfileService;
 import org.example.userservice.utils.ApiResponse;
@@ -42,6 +43,12 @@ public class UserController {
     public ResponseEntity<ApiResponse<Void>> deleteAccount(Authentication authentication) {
         profileService.deleteAccount(authentication.getName());
         return ResponseEntity.ok(ApiResponse.success("Compte supprimé avec succès"));
+    }
+
+    @GetMapping("/storage")
+    public ResponseEntity<ApiResponse<UserStorageInfo>> getStorageInfo(Authentication authentication) {
+        UserStorageInfo storageInfo = profileService.getStorageInfo(authentication.getName());
+        return ResponseEntity.ok(ApiResponse.success("Storage information retrieved successfully", storageInfo));
     }
 
     // Internal endpoints for inter-service communication

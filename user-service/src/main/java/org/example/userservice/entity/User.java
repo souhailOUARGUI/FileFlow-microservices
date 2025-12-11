@@ -25,6 +25,9 @@ public class User {
     private String password;
     private long storageUsed;
     private long maxStorage;
+    
+    @Column(name = "email_verified")
+    private boolean emailVerified = false;
 
     @Column(name = "created_at", updatable = false)
     @Temporal(TemporalType.TIMESTAMP)

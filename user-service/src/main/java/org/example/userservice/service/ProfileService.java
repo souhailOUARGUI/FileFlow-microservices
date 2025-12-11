@@ -1,6 +1,7 @@
 package org.example.userservice.service;
 
 import org.example.userservice.dto.UserResponseDTO;
+import org.example.userservice.dto.UserStorageInfo;
 import org.example.userservice.dto.UserUpdateRequest;
 import org.example.userservice.entity.User;
 import org.example.userservice.exception.EmailAlreadyExistException;
@@ -97,5 +98,22 @@ public class ProfileService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("Utilisateur non trouvé"));
         return (user.getStorageUsed() + fileSize) <= user.getMaxStorage();
+    }
+
+    public UserStorageInfo getStorageInfo(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("Utilisateur non trouvé"));
+        
+        long storageUsed = user.getStorageUsed();
+        long maxStorage = user.getMaxStorage();
+        long availableStorage = maxStorage - storageUsed;
+        double storageUsedPercentage = maxStorage > 0 ? (double) storageUsed / maxStorage * 100 : 0;
+        
+        return UserStorageInfo.builder()
+                .storageUsed(storageUsed)
+                .maxStorage(maxStorage)
+                .availableStorage(availableStorage)
+                .storageUsedPercentage(storageUsedPercentage)
+                .build();
     }
 }

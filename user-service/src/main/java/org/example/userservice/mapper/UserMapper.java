@@ -28,6 +28,6 @@ public interface UserMapper {
     @Named("calculateStoragePercentage")
     default Double calculateStoragePercentage(User user) {
         if (user == null || user.getMaxStorage() == 0) return 0.0;
-        return (user.getStorageUsed().doubleValue() / user.getMaxStorage().doubleValue()) * 100;
+        return ((double) user.getStorageUsed() / (double) user.getMaxStorage()) * 100;
     }
 }

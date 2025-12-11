@@ -14,7 +14,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 @Service
@@ -40,13 +40,13 @@ public class RefreshTokenService {
         RefreshToken refreshToken = new RefreshToken();
         refreshToken.setUser(user);
         refreshToken.setToken(UUID.randomUUID().toString());
-        refreshToken.setExpiryDate(LocalDateTime.now().plusSeconds(refreshTokenExpiration / 1000));
+        refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenExpiration));
 
         return refreshTokenRepository.save(refreshToken);
     }
 
     public RefreshToken verifyExpiration(RefreshToken token) {
-        if (token.getExpiryDate().isBefore(LocalDateTime.now())) {
+        if (token.getExpiryDate().isBefore(Instant.now())) {
             refreshTokenRepository.delete(token);
             throw new TokenExpiredException("Le token de rafraîchissement a expiré. Veuillez vous reconnecter.");
         }
@@ -77,6 +77,6 @@ public class RefreshTokenService {
     @Scheduled(cron = "0 0 0 * * ?") // Run daily at midnight
     @Transactional
     public void cleanupExpiredTokens() {
-        refreshTokenRepository.deleteAllByExpiryDateBefore(LocalDateTime.now());
+        refreshTokenRepository.deleteAllByExpiryDateBefore(Instant.now());
     }
 }
