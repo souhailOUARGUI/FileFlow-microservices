@@ -19,6 +19,30 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
+  
+  # RabbitMQ Configuration
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+  
+  # Spring Cloud Configuration (merged)
+  cloud:
+    config:
+      enabled: false
+    stream:
+      bindings:
+        userCreatedConsumer-in-0:
+          destination: user-created
+          content-type: application/json
+          group: folder-service-group
+        userDeletedConsumer-in-0:
+          destination: user-deleted
+          content-type: application/json
+          group: folder-service-group
+      function:
+        definition: userCreatedConsumer;userDeletedConsumer
 
 # Eureka Client Configuration
 eureka:
@@ -46,14 +70,6 @@ services:
     url: http://localhost:8081
   file-service:
     url: http://localhost:8082
-
-# Swagger/OpenAPI Configuration
-springdoc:
-  api-docs:
-    path: /v3/api-docs
-  swagger-ui:
-    path: /swagger-ui.html
-    enabled: true
 
 # Logging
 logging:
